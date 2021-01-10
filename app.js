@@ -5,7 +5,7 @@ const bodyParser = require("body-parser")
 
 const app = express()
 
-var newItem = "";
+var items = ["Drink Coffee", "Eat Breakfast", "Code on Project"];
 
 app.set("view engine", "ejs");
 
@@ -19,18 +19,21 @@ var today  = new Date();
 var options = {
   weekday: "long",
   day: "numeric",
+
   month: "long"
 };
 
 var day = today.toLocaleDateString("en-US", options)
 
-  res.render("list", {kindOfDay: day, newListItem: newItem});
+  res.render("list", {kindOfDay: day, newListItems: items});
 });
 
 
 app.post ("/", (req, res) => {
-  newItem = req.body.newItem
+  newItems = req.body.newItem
   
+  items.push(newItems);
+
   res.redirect("/")
 })
 

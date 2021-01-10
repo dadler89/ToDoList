@@ -10,10 +10,12 @@
 <h1> <%= kindOfDay %> </h1>
 
 <ul>
-  <li>Buy Dog food</li>
-  <li>Make Breakfast</li>
-  <li>Coding Coding</li>
-  <li><%= newListItem %></li>
+  
+ <% for (var i = 0; i<newListItems.length; i++){ %>
+ <li><%=  newListItems[i] %> </li>
+  <% } %>
+ 
+
 </ul>
 
 
