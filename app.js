@@ -16,6 +16,13 @@ const Item = mongoose.model(
   "Item", itemsSchema
 )
 
+const listSchema = {
+  name: String,
+  items: [itemsSchema]
+}
+
+const List = mongoose.model("List", listSchema);
+
 
 const drinkCoffee = new Item ({
   name: "Drink Coffee"
@@ -34,13 +41,6 @@ const shower = new Item ({
 const defaultItems = [drinkCoffee, eatBreakfast, shower];
 
 
-Item.insertMany(defaultItems, (err) => {
-  if (err) {
-    console.log(err)
-  } else {
-    console.log("Items have been updated to you Database")
-  }
-})
 
 app.set("view engine", "ejs");
 
@@ -53,28 +53,79 @@ app.get("/", (req, res) => {
 
 
 
+Item.find({}, function(err, foundItems){
+ 
+  if (foundItems.length === 0){
+Item.insertMany(defaultItems, (err) => {
+  if (err) {
+    console.log(err)
+  } else {
+    console.log("Items have been updated to you Database")
+  }
+});
+res.redirect("/");
+  } else {
+    res.render("list", {listTitle: "Today", newListItems: foundItems});
 
-  res.render("list", {listTitle: "Today", newListItems: items});
+  } 
+})
 });
 
 
 app.post ("/", (req, res) => {
 
-  const newItems = req.body.newItem
+  const itemName = req.body.newItem;
 
-  if (req.body.list === "work") {
-    workItems.push(newItems)
-    res.redirect("/work")
-  } else {  
-  items.push(newItems);
-  res.redirect("/")
+  const item= new Item ({
+    name: itemName
+  });
+    item.save();
+
+    res.redirect("/");
   }
-})
+)
 
-app.get("/work", (req, res) => {
-res.render("list", {listTitle: "work List", newListItems: workItems})
 
-})
+app.get("/:customListName", function(req, res) {
+  const customListName = req.params.customListName;
+
+  List.findOne({name: customListName}, function(err, foundList){
+    if (!err) {
+      if (!foundList) {
+        //  Create New List
+        const list = new List ({
+          name: customListName,
+          items: defaultItems
+        });
+        list.save()
+      res.redirect("/" + customListName)
+      } else {
+        // Show existing List
+        res.render("list", {listTitle: foundList.name, newListItems: foundList.items})
+      }
+    }
+  })
+});
+
+
+
+
+
+
+ app.post("/delete", (req,res) => {
+   const checkedItemId = req.body.checkbox;
+
+   Item.findByIdAndRemove(checkedItemId, function(err){
+     if (!err) {
+       console.log ("You have deleted checked Item")
+       res.redirect("/");
+     } 
+   })
+ });
+
+
+
+
 
 app.get("/about", (req, res) => {
   res.render("about")
