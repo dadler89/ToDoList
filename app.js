@@ -74,27 +74,6 @@ res.redirect("/");
 });
 
 
-app.post ("/", (req, res) => {
-
-  const itemName = req.body.newItem;
-  const listName = req.body.list;
-  const item= new Item ({
-    name: itemName
-  });
-
-  if (listName === "Today"){  
-    item.save();
-    res.redirect("/");
-  } else {
- List.findOne({name: listName}, function(err, foundList){
-   foundList.items.push(item);
-   foundList.save();
-   res.redirect("/" + listName);
- });
-  }
-});
-
-
 app.get("/:customListName", function(req, res) {
   const customListName = _.capitalize(req.params.customListName);
 
@@ -117,6 +96,26 @@ app.get("/:customListName", function(req, res) {
 });
 
 
+app.post ("/", (req, res) => {
+
+  const itemName = req.body.newItem;
+  const listName = req.body.list;
+  const item= new Item ({
+    name: itemName
+  });
+
+  if (listName === "Today"){  
+    item.save();
+    res.redirect("/");
+  } else {
+ List.findOne({name: listName}, function(err, foundList){
+   foundList.items.push(item);
+   foundList.save();
+   res.redirect("/" + listName);
+    });
+  }
+});
+
 
 
 
@@ -131,14 +130,15 @@ app.get("/:customListName", function(req, res) {
    Item.findByIdAndRemove(checkedItemId, function(err){
      if (!err) {
        console.log ("You have deleted checked Item")
-       res.redirect("/" + listName);
+       res.redirect("/");
      }
       });
 
       // Dynamically checks list by View title and deletes item by id
     } else {
 
-        List.findOneAndUpdate({name: listName}, {$pull: {items: {id: checkedItemId}}}, function (err, foundList){
+        List.findOneAndUpdate({name: listName}, {$pull: {items: {id: checkedItemId}}}, 
+          function (err, foundList){
           if (!err){
            res.redirect("/" + listName)
           }
