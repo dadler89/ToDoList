@@ -137,7 +137,7 @@ app.post ("/", (req, res) => {
       // Dynamically checks list by View title and deletes item by id
     } else {
 
-        List.findOneAndUpdate({name: listName}, {$pull: {items: {id: checkedItemId}}}, 
+        List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: checkedItemId}}}, 
           function (err, foundList){
           if (!err){
            res.redirect("/" + listName)
