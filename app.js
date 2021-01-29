@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser")
 const mongoose = require("mongoose");
+const _ = require("lodash");
 
 
 
@@ -75,19 +76,26 @@ res.redirect("/");
 app.post ("/", (req, res) => {
 
   const itemName = req.body.newItem;
-
+  const listName = req.body.list;
   const item= new Item ({
     name: itemName
   });
-    item.save();
 
+  if (listName === "Today"){  
+    item.save();
     res.redirect("/");
+  } else {
+ List.findOne({name: listName}, function(err, foundList){
+   foundList.items.push(item);
+   foundList.save();
+   res.redirect("/" + listName);
+ });
   }
-)
+});
 
 
 app.get("/:customListName", function(req, res) {
-  const customListName = req.params.customListName;
+  const customListName = _.capitalize(req.params.customListName);
 
   List.findOne({name: customListName}, function(err, foundList){
     if (!err) {
@@ -111,17 +119,32 @@ app.get("/:customListName", function(req, res) {
 
 
 
+//  This is where a List item gets deleted
 
  app.post("/delete", (req,res) => {
    const checkedItemId = req.body.checkbox;
+   const listName = req.body.listName
 
+  //  Script that checks what list item is in
+  if (listName === "Today"){
    Item.findByIdAndRemove(checkedItemId, function(err){
      if (!err) {
        console.log ("You have deleted checked Item")
-       res.redirect("/");
-     } 
-   })
- });
+       res.redirect("/" + listName);
+     }
+      });
+
+      // Dynamically checks list by View title and deletes item by id
+    } else {
+
+        List.findOneAndUpdate({name: listName}, {$pull: {items: {id: checkedItemId}}}, function (err, foundList){
+          if (!err){
+           res.redirect("/" + listName)
+          }
+        });
+      }    
+    });
+ 
 
 
 
