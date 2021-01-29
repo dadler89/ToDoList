@@ -155,9 +155,12 @@ app.get("/about", (req, res) => {
   res.render("about")
 })
 
+let port = process.env.port
+if (port == null || port == ""){
+  port = 3000
+}
 
-
-app.listen(3000, () => {
-  console.log("Andre 3k on the Server!")
+app.listen(port, function() {
+  console.log("Andre 3k listening on the port")
 })
 
